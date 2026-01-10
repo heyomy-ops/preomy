@@ -95,6 +95,107 @@
   margin-bottom: var(--space-8);
 }
 
+/* Measurement Container */
+.measurement-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.measurement-diagram {
+  background: #FAE8E5;
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.measure-image {
+  max-width: 200px;
+  height: auto;
+}
+
+.measurement-notice {
+  background: #FDF3E0;
+  color: #8B7355;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.measurement-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.measurement-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.measurement-label {
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+  color: var(--color-charcoal);
+  min-width: 30px;
+}
+
+.measurement-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.measurement-select {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-beige-dark);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  background: var(--color-white);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.measurement-select:focus {
+  outline: none;
+  border-color: #E8836B;
+}
+
+.measurement-unit {
+  color: var(--color-medium-grey);
+  font-size: var(--text-base);
+}
+
+/* Coral Button */
+.btn-coral {
+  background: #E8836B;
+  color: var(--color-white);
+  padding: var(--space-4) var(--space-10);
+  border-radius: var(--radius-full);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  transition: all var(--transition-base);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-coral:hover {
+  background: #D6735C;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(232, 131, 107, 0.3);
+}
+
 /* Scope Grid */
 .scope-grid {
   display: grid;
@@ -193,40 +294,89 @@
   }
 }
 
+.step-subtitle {
+  color: var(--color-medium-grey);
+  margin-bottom: var(--space-8);
+}
+
+.link-coral {
+  color: #E8836B;
+  font-weight: var(--font-medium);
+  text-decoration: none;
+}
+
+.link-coral:hover {
+  text-decoration: underline;
+}
+
 .layout-card {
-  padding: var(--space-4);
-  background: var(--color-beige-light);
+  padding: var(--space-3);
+  background: #FAE8E5;
   border: 2px solid transparent;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   transition: all var(--transition-base);
   text-align: center;
+  cursor: pointer;
 }
 
 .layout-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
-  border-color: var(--color-gold-light);
+  border-color: #E8836B;
 }
 
 .layout-card.selected {
-  border-color: var(--color-gold);
-  background: rgba(184, 149, 110, 0.1);
+  border-color: #E8836B;
+  background: #FAE8E5;
 }
 
-.layout-visual {
-  height: 100px;
-  border-radius: var(--radius-md);
+.layout-image-container {
+  position: relative;
   margin-bottom: var(--space-3);
+}
+
+.layout-image {
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+}
+
+.layout-radio {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-medium-grey);
+  border-radius: 50%;
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.radio-circle.checked {
+  border-color: #E8836B;
+  background: #E8836B;
+}
+
+.radio-circle.checked::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--color-white);
+  border-radius: 50%;
 }
 
 .layout-card h4 {
   font-size: var(--text-base);
-  margin-bottom: var(--space-1);
-}
-
-.layout-card p {
-  font-size: var(--text-xs);
-  color: var(--color-medium-grey);
+  font-weight: var(--font-medium);
+  color: var(--color-charcoal);
   margin: 0;
 }
 

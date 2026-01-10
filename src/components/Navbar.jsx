@@ -19,6 +19,18 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
@@ -29,12 +41,18 @@ const Navbar = () => {
     { path: '/contact', label: 'Contact' },
   ];
 
+  // Check if on home page - only home page has transparent hero background
+  const isHomePage = location.pathname === '/';
+  
+  // Apply dark navbar on non-home pages OR when scrolled on home page
+  const shouldUseDarkNavbar = !isHomePage || isScrolled;
+
   return (
-    <header className={`navbar ${isScrolled ? 'navbar-scrolled' : ''}`}>
+    <header className={`navbar ${shouldUseDarkNavbar ? 'navbar-scrolled' : ''}`}>
       <div className="container">
         <nav className="navbar-inner">
           <Link to="/" className="navbar-logo">
-            <span className="logo-text">PREOMY</span>
+            <img src="/images/logo.png" alt="PREOMY" className="logo-image" />
           </Link>
 
           <ul className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>

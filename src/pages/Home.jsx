@@ -123,51 +123,61 @@ const whyChooseUs = [
 const Home = () => {
   return (
     <main className="home-page">
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-bg">
-          <div className="hero-gradient"></div>
+      {/* Fullscreen Hero Section */}
+      <section className="hero-fullscreen">
+        {/* Background Image */}
+        <div className="hero-bg-fullscreen">
+          <div 
+            className="hero-bg-image" 
+            style={{ backgroundImage: 'url(/images/hero-fullscreen.png)' }}
+          ></div>
+          {/* Gradient Overlay */}
+          <div className="hero-overlay"></div>
         </div>
-        <div className="container hero-content">
-          <div className="hero-text animate-fadeInUp">
-            <span className="hero-badge">Premium Interior Design Studio</span>
-            <h1>Thoughtfully Designed Interiors, Made for You</h1>
-            <p className="hero-subtext">
-              Personalised home interiors with transparent pricing and on-time delivery. 
-              Transform your space into a home you'll love coming back to.
+        
+        {/* Hero Content */}
+        <div className="container hero-content-fullscreen">
+          <div className="hero-text-fullscreen animate-fadeInUp">
+            <h1 className="hero-title-fullscreen">
+              Timeless Interiors for Modern Living
+            </h1>
+            <p className="hero-subtext-fullscreen">
+              Creating beautiful spaces that blend functionality with aesthetics. 
+              Transform your house into a home you'll love coming back to.
             </p>
-            <div className="hero-ctas">
-              <Link to="/contact" className="btn btn-gold btn-lg">Get Free Consultation</Link>
-              <Link to="/estimator" className="btn btn-secondary btn-lg">Calculate Your Interior Cost</Link>
+            <div className="hero-ctas-fullscreen">
+              <Link to="/contact" className="btn-hero-primary">
+                Get Free Consultation
+              </Link>
+              <Link to="/estimator" className="btn-hero-secondary">
+                Calculate Your Cost
+              </Link>
             </div>
-            <div className="hero-trust">
-              <div className="trust-item">
-                <span className="trust-number">500+</span>
-                <span className="trust-label">Happy Homes</span>
+            
+            {/* Trust Indicators */}
+            <div className="hero-trust-fullscreen">
+              <div className="trust-stat">
+                <span className="trust-number-fullscreen">500+</span>
+                <span className="trust-label-fullscreen">Happy Homes</span>
               </div>
-              <div className="trust-divider"></div>
-              <div className="trust-item">
-                <span className="trust-number">10+</span>
-                <span className="trust-label">Years Experience</span>
+              <div className="trust-divider-fullscreen"></div>
+              <div className="trust-stat">
+                <span className="trust-number-fullscreen">10+</span>
+                <span className="trust-label-fullscreen">Years Experience</span>
               </div>
-              <div className="trust-divider"></div>
-              <div className="trust-item">
-                <span className="trust-number">5</span>
-                <span className="trust-label">Cities</span>
+              <div className="trust-divider-fullscreen"></div>
+              <div className="trust-stat">
+                <span className="trust-number-fullscreen">3</span>
+                <span className="trust-label-fullscreen">Cities</span>
               </div>
-            </div>
-          </div>
-          <div className="hero-visual animate-fadeIn stagger-2">
-            <div className="hero-image-grid">
-              <div className="hero-image hero-image-1"></div>
-              <div className="hero-image hero-image-2"></div>
-              <div className="hero-image hero-image-3"></div>
             </div>
           </div>
         </div>
-        <div className="hero-scroll-indicator">
+        
+        {/* Scroll Indicator */}
+        <div className="scroll-indicator-fullscreen">
           <span>Scroll to explore</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <polyline points="19 12 12 19 5 12"></polyline>
           </svg>

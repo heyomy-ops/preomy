@@ -9,7 +9,9 @@ const Footer = () => {
       <div className="container">
         <div className="footer-main">
           <div className="footer-brand">
-            <Link to="/" className="footer-logo">PREOMY</Link>
+            <Link to="/" className="footer-logo">
+              <img src="/images/logo.png" alt="PREOMY" className="footer-logo-image" />
+            </Link>
             <p className="footer-tagline">
               Thoughtfully designed interiors that transform your house into a home you'll love.
             </p>

@@ -38,6 +38,7 @@ const Estimator = () => {
     scope: '',
     layout: '',
     size: '',
+    measurements: { a: 10, b: 10, c: 10 },
     package: '',
     addOns: [],
     name: '',
@@ -49,8 +50,13 @@ const Estimator = () => {
   const totalSteps = 7;
 
   const handleScopeSelect = (scope) => {
-    setFormData({ ...formData, scope });
-    nextStep();
+    setFormData({ ...formData, scope, layout: scope === 'kitchen' ? '' : 'standard' });
+    // Skip layout step for non-kitchen scopes
+    if (scope === 'kitchen') {
+      setCurrentStep(2); // Go to layout selection
+    } else {
+      setCurrentStep(3); // Skip to size selection
+    }
   };
 
   const handleLayoutSelect = (layout) => {
@@ -87,7 +93,12 @@ const Estimator = () => {
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      // Skip layout step when going back if not kitchen
+      if (currentStep === 3 && formData.scope !== 'kitchen') {
+        setCurrentStep(1);
+      } else {
+        setCurrentStep(currentStep - 1);
+      }
     }
   };
 
@@ -114,10 +125,39 @@ const Estimator = () => {
     };
   };
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
     const price = calculatePrice();
     setEstimatedPrice(price);
+    
+    // Submit to Netlify Forms
+    try {
+      const submissionData = {
+        'form-name': 'estimator',
+        name: formData.name,
+        phone: formData.phone,
+        city: formData.city,
+        scope: formData.scope,
+        layout: formData.layout || 'N/A',
+        measurements: formData.scope === 'kitchen' 
+          ? `A: ${formData.measurements.a}ft, B: ${formData.measurements.b}ft, C: ${formData.measurements.c}ft`
+          : 'N/A',
+        size: formData.size,
+        package: formData.package,
+        addOns: formData.addOns.join(', ') || 'None',
+        estimatedPrice: `₹${price.min.toLocaleString('en-IN')} - ₹${price.max.toLocaleString('en-IN')}`,
+      };
+
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(submissionData).toString(),
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      // Still proceed to show results even if submission fails
+    }
+    
     nextStep();
   };
 
@@ -197,23 +237,27 @@ const Estimator = () => {
       case 2:
         return (
           <div className="step-content animate-fadeInUp">
-            <h2>Select your preferred layout</h2>
-            <p>Choose the layout that best suits your space.</p>
+            <h2>Select the layout of your kitchen</h2>
+            <p className="step-subtitle">Want to know more. <a href="/services" className="link-coral">Check here</a></p>
             <div className="layout-grid">
               {[
-                { id: 'straight', name: 'Straight', desc: 'Single wall kitchen' },
-                { id: 'l-shaped', name: 'L-Shaped', desc: 'Corner kitchen layout' },
-                { id: 'u-shaped', name: 'U-Shaped', desc: 'Three-wall kitchen' },
-                { id: 'parallel', name: 'Parallel', desc: 'Two parallel counters' },
+                { id: 'l-shaped', name: 'L-shaped', image: '/images/layout-l-shaped.png' },
+                { id: 'straight', name: 'Straight', image: '/images/layout-straight.png' },
+                { id: 'u-shaped', name: 'U-shaped', image: '/images/layout-u-shaped.png' },
+                { id: 'parallel', name: 'Parallel', image: '/images/layout-parallel.png' },
               ].map(layout => (
                 <button 
                   key={layout.id}
                   className={`layout-card ${formData.layout === layout.id ? 'selected' : ''}`}
                   onClick={() => handleLayoutSelect(layout.id)}
                 >
-                  <div className="layout-visual" style={{ background: getLayoutGradient(layout.id) }}></div>
+                  <div className="layout-image-container">
+                    <img src={layout.image} alt={layout.name} className="layout-image" />
+                    <div className="layout-radio">
+                      <div className={`radio-circle ${formData.layout === layout.id ? 'checked' : ''}`}></div>
+                    </div>
+                  </div>
                   <h4>{layout.name}</h4>
-                  <p>{layout.desc}</p>
                 </button>
               ))}
             </div>
@@ -221,6 +265,48 @@ const Estimator = () => {
         );
 
       case 3:
+        // For kitchen, show measurement inputs; for others, show size selection
+        if (formData.scope === 'kitchen') {
+          const measurementConfig = getMeasurementConfig();
+          return (
+            <div className="step-content animate-fadeInUp">
+              <h2>Now review the measurements for accuracy</h2>
+              <div className="measurement-container">
+                <div className="measurement-diagram">
+                  <img src={measurementConfig.image} alt={`${formData.layout} layout`} className="measure-image" />
+                </div>
+                <div className="measurement-notice">
+                  Standard size has been set for your convenience
+                </div>
+                <div className="measurement-inputs">
+                  {measurementConfig.fields.map(field => (
+                    <div key={field.id} className="measurement-row">
+                      <span className="measurement-label">{field.label}</span>
+                      <div className="measurement-input-wrapper">
+                        <select
+                          className="measurement-select"
+                          value={formData.measurements[field.id]}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            measurements: { ...formData.measurements, [field.id]: parseInt(e.target.value) }
+                          })}
+                        >
+                          {[...Array(20)].map((_, i) => (
+                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                          ))}
+                        </select>
+                        <span className="measurement-unit">ft.</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="step-actions">
+                  <button className="btn btn-coral btn-lg" onClick={handleMeasurementNext}>NEXT</button>
+                </div>
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="step-content animate-fadeInUp">
             <h2>What's your space size?</h2>
@@ -496,6 +582,63 @@ const Estimator = () => {
         { id: 'extra-large', name: 'Walk-in', range: '> 120 sq.ft' },
       ];
     }
+  };
+
+  const getMeasurementConfig = () => {
+    switch (formData.layout) {
+      case 'u-shaped':
+        return {
+          image: '/images/measure-u-shaped.png',
+          fields: [
+            { id: 'a', label: 'A' },
+            { id: 'b', label: 'B' },
+            { id: 'c', label: 'C' },
+          ]
+        };
+      case 'l-shaped':
+        return {
+          image: '/images/measure-l-shaped.png',
+          fields: [
+            { id: 'a', label: 'A' },
+            { id: 'b', label: 'B' },
+          ]
+        };
+      case 'straight':
+        return {
+          image: '/images/measure-straight.png',
+          fields: [
+            { id: 'a', label: 'A' },
+          ]
+        };
+      case 'parallel':
+        return {
+          image: '/images/measure-parallel.png',
+          fields: [
+            { id: 'a', label: 'A' },
+            { id: 'b', label: 'B' },
+          ]
+        };
+      default:
+        return {
+          image: '/images/measure-l-shaped.png',
+          fields: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }]
+        };
+    }
+  };
+
+  const handleMeasurementNext = () => {
+    // Calculate size based on measurements
+    const { a, b, c } = formData.measurements;
+    let totalLength = a + (b || 0) + (c || 0);
+    let sizeCategory = 'medium';
+    
+    if (totalLength < 15) sizeCategory = 'small';
+    else if (totalLength < 25) sizeCategory = 'medium';
+    else if (totalLength < 35) sizeCategory = 'large';
+    else sizeCategory = 'extra-large';
+    
+    setFormData({ ...formData, size: sizeCategory });
+    nextStep();
   };
 
   return (

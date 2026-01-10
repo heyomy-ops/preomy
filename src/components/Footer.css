@@ -25,13 +25,14 @@
 }
 
 .footer-logo {
-  font-family: var(--font-heading);
-  font-size: var(--text-2xl);
-  font-weight: var(--font-bold);
-  color: var(--color-white);
-  letter-spacing: 3px;
   display: inline-block;
   margin-bottom: var(--space-4);
+}
+
+.footer-logo-image {
+  height: 70px;
+  width: auto;
+  display: block;
 }
 
 .footer-tagline {
