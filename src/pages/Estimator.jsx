@@ -32,13 +32,38 @@ const addOnPrices = {
   'handles': 10000,
 };
 
+// BHK default room configurations
+const bhkDefaults = {
+  '1bhk': { livingRoom: 1, kitchen: 1, bedroom: 1, bathroom: 1, dining: 0 },
+  '2bhk': { livingRoom: 1, kitchen: 1, bedroom: 2, bathroom: 2, dining: 1 },
+  '3bhk': { livingRoom: 1, kitchen: 1, bedroom: 3, bathroom: 2, dining: 1 },
+  '4bhk': { livingRoom: 1, kitchen: 1, bedroom: 4, bathroom: 3, dining: 1 },
+  '5bhk+': { livingRoom: 2, kitchen: 1, bedroom: 5, bathroom: 4, dining: 1 },
+};
+
+// Room prices for calculation
+const roomPrices = {
+  livingRoom: 80000,
+  kitchen: 150000,
+  bedroom: 60000,
+  bathroom: 40000,
+  dining: 50000,
+};
+
 const Estimator = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [expandedBhk, setExpandedBhk] = useState(null);
   const [formData, setFormData] = useState({
     scope: '',
+    // Full Home specific
+    bhkType: '',
+    bhkSize: '',
+    rooms: { livingRoom: 1, kitchen: 1, bedroom: 2, bathroom: 2, dining: 1 },
+    // Kitchen specific
     layout: '',
-    size: '',
     measurements: { a: 10, b: 10, c: 10 },
+    // Common
+    size: '',
     package: '',
     addOns: [],
     name: '',
@@ -51,12 +76,38 @@ const Estimator = () => {
 
   const handleScopeSelect = (scope) => {
     setFormData({ ...formData, scope, layout: scope === 'kitchen' ? '' : 'standard' });
-    // Skip layout step for non-kitchen scopes
-    if (scope === 'kitchen') {
+    if (scope === 'full-home') {
+      setCurrentStep(2); // Go to BHK selection
+    } else if (scope === 'kitchen') {
       setCurrentStep(2); // Go to layout selection
     } else {
-      setCurrentStep(3); // Skip to size selection
+      setCurrentStep(3); // Go to size selection for wardrobe
     }
+  };
+
+  // BHK accordion handlers
+  const handleBhkExpand = (bhk) => {
+    setExpandedBhk(expandedBhk === bhk ? null : bhk);
+  };
+
+  const handleBhkSelect = (bhkType, bhkSize) => {
+    const defaultRooms = bhkDefaults[bhkType] || bhkDefaults['2bhk'];
+    setFormData({ 
+      ...formData, 
+      bhkType, 
+      bhkSize,
+      rooms: { ...defaultRooms },
+    });
+    setCurrentStep(3); // Go to rooms selection
+  };
+
+  // Room counter handlers
+  const handleRoomChange = (room, delta) => {
+    const newCount = Math.max(0, Math.min(10, formData.rooms[room] + delta));
+    setFormData({
+      ...formData,
+      rooms: { ...formData.rooms, [room]: newCount },
+    });
   };
 
   const handleLayoutSelect = (layout) => {
@@ -93,9 +144,21 @@ const Estimator = () => {
 
   const prevStep = () => {
     if (currentStep > 1) {
-      // Skip layout step when going back if not kitchen
-      if (currentStep === 3 && formData.scope !== 'kitchen') {
-        setCurrentStep(1);
+      // Handle step navigation based on scope
+      if (formData.scope === 'full-home') {
+        if (currentStep === 3) {
+          setCurrentStep(2); // BHK → Scope
+        } else if (currentStep === 4) {
+          setCurrentStep(3); // Package → Rooms
+        } else {
+          setCurrentStep(currentStep - 1);
+        }
+      } else if (formData.scope === 'wardrobe') {
+        if (currentStep === 3) {
+          setCurrentStep(1);
+        } else {
+          setCurrentStep(currentStep - 1);
+        }
       } else {
         setCurrentStep(currentStep - 1);
       }
@@ -103,26 +166,59 @@ const Estimator = () => {
   };
 
   const calculatePrice = () => {
-    const basePrice = basePrices[formData.scope]?.[formData.package] || 0;
-    const sizeMultiplier = sizeMultipliers[formData.size] || 1;
-    const layoutMultiplier = layoutMultipliers[formData.layout] || 1;
+    let totalPrice = 0;
     
-    let addOnsTotal = 0;
-    formData.addOns.forEach(addOn => {
-      addOnsTotal += addOnPrices[addOn] || 0;
-    });
+    if (formData.scope === 'full-home') {
+      // Calculate based on rooms
+      const packageMultiplier = formData.package === 'essential' ? 1 : formData.package === 'premium' ? 1.4 : 1.8;
+      const sizeMultiplier = formData.bhkSize === 'small' ? 0.85 : 1.15;
+      
+      let roomsTotal = 0;
+      Object.entries(formData.rooms).forEach(([room, count]) => {
+        roomsTotal += (roomPrices[room] || 50000) * count;
+      });
+      
+      totalPrice = roomsTotal * packageMultiplier * sizeMultiplier;
+      
+      // Add-ons
+      let addOnsTotal = 0;
+      formData.addOns.forEach(addOn => {
+        addOnsTotal += addOnPrices[addOn] || 0;
+      });
+      totalPrice += addOnsTotal;
+      
+      return {
+        base: roomsTotal,
+        packageAdjustment: roomsTotal * (packageMultiplier - 1),
+        sizeAdjustment: roomsTotal * packageMultiplier * (sizeMultiplier - 1),
+        addOns: addOnsTotal,
+        total: totalPrice,
+        min: Math.round(totalPrice * 0.9),
+        max: Math.round(totalPrice * 1.1),
+      };
+    } else {
+      // Kitchen or Wardrobe calculation
+      const basePrice = basePrices[formData.scope]?.[formData.package] || 0;
+      const sizeMultiplier = sizeMultipliers[formData.size] || 1;
+      const layoutMultiplier = layoutMultipliers[formData.layout] || 1;
+      
+      let addOnsTotal = 0;
+      formData.addOns.forEach(addOn => {
+        addOnsTotal += addOnPrices[addOn] || 0;
+      });
 
-    const totalPrice = (basePrice * sizeMultiplier * layoutMultiplier) + addOnsTotal;
-    
-    return {
-      base: basePrice,
-      sizeAdjustment: basePrice * (sizeMultiplier - 1),
-      layoutAdjustment: basePrice * (layoutMultiplier - 1),
-      addOns: addOnsTotal,
-      total: totalPrice,
-      min: Math.round(totalPrice * 0.9),
-      max: Math.round(totalPrice * 1.1),
-    };
+      totalPrice = (basePrice * sizeMultiplier * layoutMultiplier) + addOnsTotal;
+      
+      return {
+        base: basePrice,
+        sizeAdjustment: basePrice * (sizeMultiplier - 1),
+        layoutAdjustment: basePrice * (layoutMultiplier - 1),
+        addOns: addOnsTotal,
+        total: totalPrice,
+        min: Math.round(totalPrice * 0.9),
+        max: Math.round(totalPrice * 1.1),
+      };
+    }
   };
 
   const handleContactSubmit = async (e) => {
@@ -132,17 +228,29 @@ const Estimator = () => {
     
     // Submit to Netlify Forms
     try {
+      // Build rooms string for Full Home
+      const roomsString = formData.scope === 'full-home'
+        ? `Living Room: ${formData.rooms.livingRoom}, Kitchen: ${formData.rooms.kitchen}, Bedroom: ${formData.rooms.bedroom}, Bathroom: ${formData.rooms.bathroom}, Dining: ${formData.rooms.dining}`
+        : 'N/A';
+
       const submissionData = {
         'form-name': 'estimator',
         name: formData.name,
         phone: formData.phone,
         city: formData.city,
         scope: formData.scope,
-        layout: formData.layout || 'N/A',
+        // Full Home specific
+        bhkType: formData.scope === 'full-home' ? formData.bhkType : 'N/A',
+        bhkSize: formData.scope === 'full-home' ? formData.bhkSize : 'N/A',
+        rooms: roomsString,
+        // Kitchen specific
+        layout: formData.scope === 'kitchen' ? formData.layout : 'N/A',
         measurements: formData.scope === 'kitchen' 
           ? `A: ${formData.measurements.a}ft, B: ${formData.measurements.b}ft, C: ${formData.measurements.c}ft`
           : 'N/A',
-        size: formData.size,
+        // Wardrobe specific
+        size: formData.scope === 'wardrobe' ? formData.size : 'N/A',
+        // Common
         package: formData.package,
         addOns: formData.addOns.join(', ') || 'None',
         estimatedPrice: `₹${price.min.toLocaleString('en-IN')} - ₹${price.max.toLocaleString('en-IN')}`,
@@ -235,38 +343,146 @@ const Estimator = () => {
         );
 
       case 2:
-        return (
-          <div className="step-content animate-fadeInUp">
-            <h2>Select the layout of your kitchen</h2>
-            <p className="step-subtitle">Want to know more. <a href="/services" className="link-coral">Check here</a></p>
-            <div className="layout-grid">
-              {[
-                { id: 'l-shaped', name: 'L-shaped', image: '/images/layout-l-shaped.png' },
-                { id: 'straight', name: 'Straight', image: '/images/layout-straight.png' },
-                { id: 'u-shaped', name: 'U-shaped', image: '/images/layout-u-shaped.png' },
-                { id: 'parallel', name: 'Parallel', image: '/images/layout-parallel.png' },
-              ].map(layout => (
-                <button 
-                  key={layout.id}
-                  className={`layout-card ${formData.layout === layout.id ? 'selected' : ''}`}
-                  onClick={() => handleLayoutSelect(layout.id)}
-                >
-                  <div className="layout-image-container">
-                    <img src={layout.image} alt={layout.name} className="layout-image" />
-                    <div className="layout-radio">
-                      <div className={`radio-circle ${formData.layout === layout.id ? 'checked' : ''}`}></div>
-                    </div>
+        // For Full Home: BHK selection; For Kitchen: Layout selection
+        if (formData.scope === 'full-home') {
+          return (
+            <div className="step-content animate-fadeInUp">
+              <h2>Select your BHK type</h2>
+              <p className="step-subtitle">To know more about this, <a href="/services" className="link-coral">click here</a></p>
+              <div className="bhk-accordion">
+                {[
+                  { id: '1bhk', label: '1 BHK' },
+                  { id: '2bhk', label: '2 BHK' },
+                  { id: '3bhk', label: '3 BHK' },
+                  { id: '4bhk', label: '4 BHK' },
+                  { id: '5bhk+', label: '5 BHK+' },
+                ].map(bhk => (
+                  <div key={bhk.id} className="bhk-item">
+                    <button 
+                      className={`bhk-header ${expandedBhk === bhk.id ? 'expanded' : ''} ${formData.bhkType === bhk.id ? 'selected' : ''}`}
+                      onClick={() => handleBhkExpand(bhk.id)}
+                    >
+                      <div className="bhk-radio">
+                        <div className={`radio-circle ${formData.bhkType === bhk.id ? 'checked' : ''}`}></div>
+                      </div>
+                      <span className="bhk-label">{bhk.label}</span>
+                      <svg className={`bhk-arrow ${expandedBhk === bhk.id ? 'rotated' : ''}`} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                    {expandedBhk === bhk.id && (
+                      <div className="bhk-size-options">
+                        <button 
+                          className={`bhk-size-btn ${formData.bhkType === bhk.id && formData.bhkSize === 'small' ? 'selected' : ''}`}
+                          onClick={() => handleBhkSelect(bhk.id, 'small')}
+                        >
+                          <div className="size-radio">
+                            <div className={`radio-circle ${formData.bhkType === bhk.id && formData.bhkSize === 'small' ? 'checked' : ''}`}></div>
+                          </div>
+                          <div className="size-info">
+                            <span className="size-name">Small</span>
+                            <span className="size-desc">Below 800 sq ft</span>
+                          </div>
+                        </button>
+                        <button 
+                          className={`bhk-size-btn ${formData.bhkType === bhk.id && formData.bhkSize === 'large' ? 'selected' : ''}`}
+                          onClick={() => handleBhkSelect(bhk.id, 'large')}
+                        >
+                          <div className="size-radio">
+                            <div className={`radio-circle ${formData.bhkType === bhk.id && formData.bhkSize === 'large' ? 'checked' : ''}`}></div>
+                          </div>
+                          <div className="size-info">
+                            <span className="size-name">Large</span>
+                            <span className="size-desc">Above 800 sq ft</span>
+                          </div>
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <h4>{layout.name}</h4>
-                </button>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        );
+          );
+        } else {
+          // Kitchen layout selection
+          return (
+            <div className="step-content animate-fadeInUp">
+              <h2>Select the layout of your kitchen</h2>
+              <p className="step-subtitle">Want to know more. <a href="/services" className="link-coral">Check here</a></p>
+              <div className="layout-grid">
+                {[
+                  { id: 'l-shaped', name: 'L-shaped', image: '/images/layout-l-shaped.png' },
+                  { id: 'straight', name: 'Straight', image: '/images/layout-straight.png' },
+                  { id: 'u-shaped', name: 'U-shaped', image: '/images/layout-u-shaped.png' },
+                  { id: 'parallel', name: 'Parallel', image: '/images/layout-parallel.png' },
+                ].map(layout => (
+                  <button 
+                    key={layout.id}
+                    className={`layout-card ${formData.layout === layout.id ? 'selected' : ''}`}
+                    onClick={() => handleLayoutSelect(layout.id)}
+                  >
+                    <div className="layout-image-container">
+                      <img src={layout.image} alt={layout.name} className="layout-image" />
+                      <div className="layout-radio">
+                        <div className={`radio-circle ${formData.layout === layout.id ? 'checked' : ''}`}></div>
+                      </div>
+                    </div>
+                    <h4>{layout.name}</h4>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
 
       case 3:
-        // For kitchen, show measurement inputs; for others, show size selection
-        if (formData.scope === 'kitchen') {
+        // For Full Home: Room selection; For Kitchen: Measurements; For Wardrobe: Size
+        if (formData.scope === 'full-home') {
+          return (
+            <div className="step-content animate-fadeInUp">
+              <h2>Select the rooms you'd like us to design</h2>
+              <p className="step-subtitle">To know more about this, <a href="/services" className="link-coral">click here</a></p>
+              <div className="rooms-list">
+                {[
+                  { id: 'livingRoom', label: 'Living Room' },
+                  { id: 'kitchen', label: 'Kitchen' },
+                  { id: 'bedroom', label: 'Bedroom' },
+                  { id: 'bathroom', label: 'Bathroom' },
+                  { id: 'dining', label: 'Dining' },
+                ].map(room => (
+                  <div key={room.id} className="room-item">
+                    <span className="room-label">{room.label}</span>
+                    <div className="room-counter">
+                      <button 
+                        className="counter-btn counter-minus"
+                        onClick={() => handleRoomChange(room.id, -1)}
+                        disabled={formData.rooms[room.id] === 0}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                      <span className="counter-value">{formData.rooms[room.id]}</span>
+                      <button 
+                        className="counter-btn counter-plus"
+                        onClick={() => handleRoomChange(room.id, 1)}
+                        disabled={formData.rooms[room.id] >= 10}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="step-actions" style={{ marginTop: '2rem' }}>
+                <button className="btn btn-coral btn-lg" onClick={nextStep}>NEXT</button>
+              </div>
+            </div>
+          );
+        } else if (formData.scope === 'kitchen') {
           const measurementConfig = getMeasurementConfig();
           return (
             <div className="step-content animate-fadeInUp">
@@ -307,10 +523,11 @@ const Estimator = () => {
             </div>
           );
         }
+        // Wardrobe size selection
         return (
           <div className="step-content animate-fadeInUp">
             <h2>What's your space size?</h2>
-            <p>Select the approximate size of your {formData.scope === 'full-home' ? 'home' : formData.scope}.</p>
+            <p>Select the approximate size of your {formData.scope}.</p>
             <div className="size-grid">
               {getSizeOptions().map(size => (
                 <button 
@@ -468,11 +685,9 @@ const Estimator = () => {
                   required
                 >
                   <option value="">Select your city</option>
-                  <option value="mumbai">Mumbai</option>
-                  <option value="delhi">Delhi NCR</option>
-                  <option value="bangalore">Bangalore</option>
-                  <option value="hyderabad">Hyderabad</option>
-                  <option value="pune">Pune</option>
+                  <option value="raipur">Raipur</option>
+                  <option value="bilaspur">Bilaspur</option>
+                  <option value="korba">Korba</option>
                 </select>
               </div>
               <button type="submit" className="btn btn-gold btn-lg w-full">

@@ -67,11 +67,9 @@ const values = [
 ];
 
 const cities = [
-  { name: 'Mumbai', projects: 150 },
-  { name: 'Delhi NCR', projects: 120 },
-  { name: 'Bangalore', projects: 100 },
-  { name: 'Hyderabad', projects: 80 },
-  { name: 'Pune', projects: 50 },
+  { name: 'Raipur', projects: 150 },
+  { name: 'Bilaspur', projects: 100 },
+  { name: 'Korba', projects: 80 },
 ];
 
 const About = () => {
@@ -100,26 +98,26 @@ const About = () => {
               <h2>A Journey of Design Excellence</h2>
               <p>
                 PREOMY was born from a simple belief: everyone deserves a beautiful home. 
-                Founded in 2014 by Arjun Mehta, a visionary designer with a passion for 
-                creating spaces that inspire, we started as a small studio in Mumbai with 
+                Founded in 2014, a visionary designer with a passion for 
+                creating spaces that inspire, we started as a small studio in Raipur with 
                 big dreams.
               </p>
               <p>
-                Over the past decade, we've grown from a team of three to a family of 50+ 
+                Over the past decade, we've grown from a team of three to a family of 20+ 
                 talented professionals. What hasn't changed is our commitment to quality, 
                 craftsmanship, and client satisfaction. Every project we undertake is 
                 treated with the same care and attention to detail, whether it's a cozy 
                 apartment or a sprawling villa.
               </p>
               <p>
-                Today, PREOMY is recognized as one of India's leading interior design 
-                studios, with over 500 happy homes across five major cities. Our journey 
+                Today, PREOMY is recognized as Chhattisgarh's leading interior design 
+                studio, with over 300 happy homes across Raipur, Bilaspur, and Korba. Our journey 
                 continues, one beautiful home at a time.
               </p>
             </div>
             <div className="story-stats animate-fadeInUp stagger-2">
               <div className="stat">
-                <span className="stat-number">500+</span>
+                <span className="stat-number">300+</span>
                 <span className="stat-label">Homes Designed</span>
               </div>
               <div className="stat">
@@ -127,11 +125,11 @@ const About = () => {
                 <span className="stat-label">Years of Experience</span>
               </div>
               <div className="stat">
-                <span className="stat-number">50+</span>
+                <span className="stat-number">20+</span>
                 <span className="stat-label">Team Members</span>
               </div>
               <div className="stat">
-                <span className="stat-number">5</span>
+                <span className="stat-number">3</span>
                 <span className="stat-label">Cities</span>
               </div>
             </div>
@@ -234,7 +232,7 @@ const About = () => {
           <div className="section-header">
             <span className="section-badge">Our Presence</span>
             <h2>Cities We Serve</h2>
-            <p>Bringing premium interiors to homes across India.</p>
+            <p>Bringing premium interiors to homes across Chhattisgarh.</p>
           </div>
           <div className="cities-grid">
             {cities.map((city, index) => (

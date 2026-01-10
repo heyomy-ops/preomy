@@ -380,6 +380,182 @@
   margin: 0;
 }
 
+/* BHK Accordion */
+.bhk-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.bhk-item {
+  background: var(--color-white);
+  border: 1px solid var(--color-beige);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.bhk-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bhk-header:hover {
+  background: var(--color-beige-light);
+}
+
+.bhk-header.selected {
+  background: #FEF2F0;
+}
+
+.bhk-radio {
+  flex-shrink: 0;
+}
+
+.bhk-label {
+  flex: 1;
+  text-align: left;
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--color-charcoal);
+}
+
+.bhk-arrow {
+  color: var(--color-medium-grey);
+  transition: transform var(--transition-fast);
+}
+
+.bhk-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.bhk-size-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-beige-light);
+  border-top: 1px solid var(--color-beige);
+}
+
+.bhk-size-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-white);
+  border: 2px solid var(--color-beige);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bhk-size-btn:hover {
+  border-color: #E8836B;
+}
+
+.bhk-size-btn.selected {
+  border-color: #E8836B;
+  background: #FEF2F0;
+}
+
+.size-radio {
+  margin-top: 2px;
+}
+
+.size-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.size-name {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-charcoal);
+}
+
+.size-desc {
+  font-size: var(--text-sm);
+  color: var(--color-medium-grey);
+}
+
+/* Room Counter */
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-white);
+  border: 1px solid var(--color-beige);
+  border-radius: var(--radius-lg);
+}
+
+.room-label {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--color-charcoal);
+}
+
+.room-counter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.counter-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.counter-minus {
+  background: #E8836B;
+  color: white;
+}
+
+.counter-plus {
+  background: #E8836B;
+  color: white;
+}
+
+.counter-btn:disabled {
+  background: var(--color-beige);
+  color: var(--color-medium-grey);
+  cursor: not-allowed;
+}
+
+.counter-btn:not(:disabled):hover {
+  transform: scale(1.1);
+}
+
+.counter-value {
+  min-width: 32px;
+  text-align: center;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-charcoal);
+}
+
 /* Size Grid */
 .size-grid {
   display: grid;

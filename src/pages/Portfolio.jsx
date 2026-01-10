@@ -1,21 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getProjects } from '../lib/sanity';
 import './Portfolio.css';
-
-const projects = [
-  { id: 1, title: 'Modern Minimalist Villa', location: 'Mumbai', style: 'Minimalist', area: '2800 sq.ft', category: 'villa', description: 'A stunning 4BHK villa with clean lines and natural materials.' },
-  { id: 2, title: 'Contemporary L-Kitchen', location: 'Delhi', style: 'Contemporary', area: '180 sq.ft', category: 'kitchen', description: 'An L-shaped modular kitchen with smart storage solutions.' },
-  { id: 3, title: 'Scandinavian 2BHK', location: 'Bangalore', style: 'Scandinavian', area: '1100 sq.ft', category: '2bhk', description: 'Light-filled apartment with Nordic-inspired interiors.' },
-  { id: 4, title: 'Luxury Walk-in Wardrobe', location: 'Pune', style: 'Luxury', area: '150 sq.ft', category: 'wardrobe', description: 'Custom walk-in closet with island and lighting features.' },
-  { id: 5, title: 'Classic 3BHK Home', location: 'Hyderabad', style: 'Classic', area: '1800 sq.ft', category: '3bhk', description: 'Timeless interiors blending tradition with modern comfort.' },
-  { id: 6, title: 'Industrial Kitchen', location: 'Mumbai', style: 'Industrial', area: '220 sq.ft', category: 'kitchen', description: 'Open kitchen with exposed elements and bold finishes.' },
-  { id: 7, title: 'Compact 2BHK Design', location: 'Pune', style: 'Modern', area: '950 sq.ft', category: '2bhk', description: 'Space-efficient design maximizing every square foot.' },
-  { id: 8, title: 'Elegant 3BHK Apartment', location: 'Delhi', style: 'Elegant', area: '2000 sq.ft', category: '3bhk', description: 'Sophisticated interiors with premium finishes throughout.' },
-  { id: 9, title: 'Mediterranean Villa', location: 'Bangalore', style: 'Mediterranean', area: '3500 sq.ft', category: 'villa', description: 'Warm, inviting spaces inspired by Mediterranean design.' },
-  { id: 10, title: 'U-Shaped Kitchen', location: 'Hyderabad', style: 'Modern', area: '200 sq.ft', category: 'kitchen', description: 'Efficient U-shaped layout with breakfast counter.' },
-  { id: 11, title: 'Master Bedroom Suite', location: 'Mumbai', style: 'Contemporary', area: '400 sq.ft', category: '3bhk', description: 'Luxurious master suite with custom wardrobe and seating.' },
-  { id: 12, title: 'Sliding Wardrobe Design', location: 'Delhi', style: 'Minimalist', area: '80 sq.ft', category: 'wardrobe', description: 'Sleek sliding wardrobe with mirror and organized interiors.' },
-];
 
 const categories = [
   { id: 'all', label: 'All Projects' },
@@ -29,6 +15,61 @@ const categories = [
 const Portfolio = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedProject, setSelectedProject] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch projects from Sanity CMS
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const sanityProjects = await getProjects();
+        if (sanityProjects && sanityProjects.length > 0) {
+          // Map Sanity data to our format
+          const formattedProjects = sanityProjects.map((p, index) => ({
+            id: p._id || index + 1,
+            title: p.title,
+            location: p.location,
+            style: p.style,
+            area: p.area,
+            category: p.category,
+            description: p.description,
+            images: p.images || [], // Array of images
+            image: p.images && p.images[0], // First image as cover
+          }));
+          setProjects(formattedProjects);
+        }
+      } catch (error) {
+        console.log('Error fetching projects:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProjects();
+  }, []);
+
+  // Reset image index when modal opens
+  const openProject = (project) => {
+    setSelectedProject(project);
+    setCurrentImageIndex(0);
+  };
+
+  // Navigation for slider
+  const nextImage = () => {
+    if (selectedProject?.images?.length > 1) {
+      setCurrentImageIndex((prev) => 
+        prev === selectedProject.images.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedProject?.images?.length > 1) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? selectedProject.images.length - 1 : prev - 1
+      );
+    }
+  };
 
   const filteredProjects = activeFilter === 'all' 
     ? projects 
@@ -70,14 +111,44 @@ const Portfolio = () => {
       {/* Projects Grid */}
       <section className="section portfolio-grid-section bg-white">
         <div className="container">
+          {isLoading ? (
+            <div className="portfolio-empty">
+              <div className="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <h3>Loading Projects...</h3>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="portfolio-empty">
+              <div className="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <h3>Projects Coming Soon!</h3>
+              <p>We're currently curating our best work. Check back soon to see our stunning portfolio.</p>
+              <Link to="/contact" className="btn btn-primary">Get Free Consultation</Link>
+            </div>
+          ) : (
           <div className="portfolio-grid">
             {filteredProjects.map((project, index) => (
               <div 
                 key={project.id}
                 className={`portfolio-card animate-fadeInUp stagger-${(index % 4) + 1}`}
-                onClick={() => setSelectedProject(project)}
+                onClick={() => openProject(project)}
               >
-                <div className="portfolio-image" style={{ background: getProjectGradient(project.id) }}>
+                <div 
+                  className="portfolio-image" 
+                  style={project.image 
+                    ? { backgroundImage: `url(${project.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                    : { background: getProjectGradient(project.id) }
+                  }
+                >
                   <div className="portfolio-overlay">
                     <span className="portfolio-category">{project.category.toUpperCase()}</span>
                     <div className="portfolio-view">
@@ -102,6 +173,7 @@ const Portfolio = () => {
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 
@@ -115,7 +187,42 @@ const Portfolio = () => {
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
-            <div className="modal-image" style={{ background: getProjectGradient(selectedProject.id) }}></div>
+            <div className="modal-image-wrapper">
+              <div 
+                className="modal-image" 
+                style={selectedProject.images && selectedProject.images[currentImageIndex]
+                  ? { backgroundImage: `url(${selectedProject.images[currentImageIndex]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                  : { background: getProjectGradient(selectedProject.id) }
+                }
+              ></div>
+              
+              {/* Slider Navigation */}
+              {selectedProject.images && selectedProject.images.length > 1 && (
+                <>
+                  <button className="slider-btn slider-prev" onClick={prevImage}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+                  <button className="slider-btn slider-next" onClick={nextImage}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                  
+                  {/* Dots Indicator */}
+                  <div className="slider-dots">
+                    {selectedProject.images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        className={`slider-dot ${idx === currentImageIndex ? 'active' : ''}`}
+                        onClick={() => setCurrentImageIndex(idx)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             <div className="modal-details">
               <span className="modal-category">{selectedProject.category.toUpperCase()}</span>
               <h2>{selectedProject.title}</h2>

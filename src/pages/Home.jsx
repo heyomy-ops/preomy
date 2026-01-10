@@ -1,35 +1,27 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getProjects } from '../lib/sanity';
 import './Home.css';
-
-// Sample project images - using placeholder colors for now
-const projects = [
-  { id: 1, title: '3BHK Modern Villa', location: 'Mumbai', style: 'Contemporary', area: '2200 sq.ft', category: 'villa' },
-  { id: 2, title: 'Modular Kitchen', location: 'Delhi', style: 'Minimalist', area: '180 sq.ft', category: 'kitchen' },
-  { id: 3, title: '2BHK Apartment', location: 'Bangalore', style: 'Scandinavian', area: '1100 sq.ft', category: '2bhk' },
-  { id: 4, title: 'Master Wardrobe', location: 'Pune', style: 'Luxury', area: '120 sq.ft', category: 'wardrobe' },
-  { id: 5, title: '3BHK Premium Home', location: 'Hyderabad', style: 'Modern Classic', area: '1800 sq.ft', category: '3bhk' },
-  { id: 6, title: 'Open Kitchen Design', location: 'Mumbai', style: 'Industrial', area: '200 sq.ft', category: 'kitchen' },
-];
 
 const testimonials = [
   {
     id: 1,
     name: 'Priya Sharma',
-    location: 'Mumbai',
+    location: 'Raipur',
     text: 'PREOMY transformed our 3BHK into a stunning space. The attention to detail and quality of materials exceeded our expectations. Highly recommended!',
     rating: 5,
   },
   {
     id: 2,
     name: 'Rajesh Gupta',
-    location: 'Delhi',
+    location: 'Bilaspur',
     text: 'Professional team, transparent pricing, and excellent execution. Our modular kitchen is now the highlight of our home. Thank you, PREOMY!',
     rating: 5,
   },
   {
     id: 3,
     name: 'Ananya Iyer',
-    location: 'Bangalore',
+    location: 'Korba',
     text: 'From design to delivery, everything was seamless. The 3D visualization helped us see our dream home before it was built. Wonderful experience!',
     rating: 5,
   },
@@ -86,7 +78,7 @@ const whyChooseUs = [
       </svg>
     ),
     title: '10+ Years Experience',
-    description: 'A decade of expertise delivering exceptional interior design projects across India.',
+    description: 'A decade of expertise delivering exceptional interior design projects across Chhattisgarh.',
   },
   {
     icon: (
@@ -121,6 +113,35 @@ const whyChooseUs = [
 ];
 
 const Home = () => {
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch featured projects from Sanity
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const sanityProjects = await getProjects();
+        if (sanityProjects && sanityProjects.length > 0) {
+          const formattedProjects = sanityProjects.slice(0, 6).map((p, index) => ({
+            id: p._id || index + 1,
+            title: p.title,
+            location: p.location,
+            style: p.style,
+            area: p.area,
+            category: p.category,
+            image: p.images && p.images[0], // Use first image as cover
+          }));
+          setProjects(formattedProjects);
+        }
+      } catch (error) {
+        console.log('Error fetching projects:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProjects();
+  }, []);
+
   return (
     <main className="home-page">
       {/* Fullscreen Hero Section */}
@@ -157,7 +178,7 @@ const Home = () => {
             {/* Trust Indicators */}
             <div className="hero-trust-fullscreen">
               <div className="trust-stat">
-                <span className="trust-number-fullscreen">500+</span>
+                <span className="trust-number-fullscreen">300+</span>
                 <span className="trust-label-fullscreen">Happy Homes</span>
               </div>
               <div className="trust-divider-fullscreen"></div>
@@ -254,6 +275,7 @@ const Home = () => {
       </section>
 
       {/* Featured Projects Section */}
+      {projects.length > 0 && (
       <section className="section projects-section bg-white">
         <div className="container">
           <div className="section-header">
@@ -267,7 +289,13 @@ const Home = () => {
                 key={project.id} 
                 className={`project-card animate-fadeInUp stagger-${(index % 3) + 1}`}
               >
-                <div className="project-image" style={{ backgroundColor: getProjectColor(index) }}>
+                <div 
+                  className="project-image" 
+                  style={project.image 
+                    ? { backgroundImage: `url(${project.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                    : { backgroundColor: getProjectColor(index) }
+                  }
+                >
                   <div className="project-overlay">
                     <span className="project-category">{project.category.toUpperCase()}</span>
                   </div>
@@ -290,6 +318,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Testimonials Section */}
       <section className="section testimonials-section">

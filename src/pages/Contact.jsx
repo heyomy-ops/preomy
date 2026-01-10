@@ -139,12 +139,9 @@ const Contact = () => {
                         required
                       >
                         <option value="">Select your city</option>
-                        <option value="mumbai">Mumbai</option>
-                        <option value="delhi">Delhi NCR</option>
-                        <option value="bangalore">Bangalore</option>
-                        <option value="hyderabad">Hyderabad</option>
-                        <option value="pune">Pune</option>
-                        <option value="other">Other</option>
+                        <option value="raipur">Raipur</option>
+                        <option value="bilaspur">Bilaspur</option>
+                        <option value="korba">Korba</option>
                       </select>
                     </div>
                   </div>
@@ -251,8 +248,8 @@ const Contact = () => {
                 <h3>Visit Our Experience Center</h3>
                 <p className="address">
                   PREOMY Design Studio<br />
-                  123 Design District, Bandra West<br />
-                  Mumbai, Maharashtra 400050
+                  Raipur, Bilaspur, Korba<br />
+                  Chhattisgarh
                 </p>
                 <a 
                   href="https://maps.google.com" 
