@@ -18,6 +18,7 @@ const services = [
     idealFor: 'Homeowners moving into a new home or looking for a complete makeover of their existing space.',
     startingPrice: '₹8 Lakhs',
     deliveryTime: '45-60 days',
+    image: '/images/service-full-home.png',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -41,6 +42,7 @@ const services = [
     idealFor: 'Families who love cooking and entertaining, or anyone looking to upgrade their kitchen space.',
     startingPrice: '₹1.5 Lakhs',
     deliveryTime: '25-35 days',
+    image: '/images/service-kitchen.png',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
@@ -65,6 +67,7 @@ const services = [
     idealFor: 'Anyone looking to organize their belongings with style and efficiency.',
     startingPrice: '₹75,000',
     deliveryTime: '15-20 days',
+    image: '/images/service-wardrobe.png',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -90,11 +93,37 @@ const services = [
     idealFor: 'Busy professionals who want a hassle-free, complete home solution.',
     startingPrice: '₹15 Lakhs',
     deliveryTime: '75-90 days',
+    image: '/images/service-turnkey.png',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
         <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
         <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+    ),
+  },
+  {
+    id: 'swimming-pool',
+    title: 'Swimming Pool Design',
+    subtitle: 'Custom pool construction and landscaping',
+    description: 'Create your dream backyard oasis with our premium swimming pool design and construction services. From modern infinity pools to classic designs, we build pools that complement your home and lifestyle.',
+    features: [
+      'Custom pool design and planning',
+      'Pool construction and installation',
+      'Deck and surrounding landscaping',
+      'Pool lighting and water features',
+      'Filtration and maintenance systems',
+      'Pool house and cabana design',
+    ],
+    idealFor: 'Homeowners with villas or bungalows looking to add a luxury swimming pool to their property.',
+    startingPrice: '₹12 Lakhs',
+    deliveryTime: '60-90 days',
+    image: '/images/service-swimming-pool.png',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 12h20"></path>
+        <path d="M2 6c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path>
+        <path d="M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path>
       </svg>
     ),
   },
@@ -175,7 +204,11 @@ const Services = () => {
               </div>
               
               <div className="service-detail-image animate-fadeIn stagger-2">
-                <div className="service-image-placeholder" style={{ background: getServiceGradient(index) }}></div>
+                <img 
+                  src={service.image} 
+                  alt={service.title} 
+                  className="service-image"
+                />
               </div>
             </div>
           ))}
